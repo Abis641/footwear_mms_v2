@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "653968092227",
+    "project_id": "footwear-mms",
+    "storage_bucket": "footwear-mms.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:653968092227:android:dae8745b1b7931c58eb8f6",
+        "android_client_info": {
+          "package_name": "com.example.footwear_mms"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDC8aFu6AG7hJtAL_jotPczcJJQeRF31pw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
