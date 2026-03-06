@@ -83,4 +83,5 @@ class DefaultFirebaseOptions {
     authDomain: 'footwear-mms.firebaseapp.com',
     storageBucket: 'footwear-mms.firebasestorage.app',
   );
+
 }
