@@ -1,59 +1,62 @@
 import 'package:flutter/material.dart';
-import '../core/services/dummy_data.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class SetPricePage extends StatefulWidget {
+class SetPricePage extends StatelessWidget {
   const SetPricePage({super.key});
 
-  @override
-  State<SetPricePage> createState() => _SetPricePageState();
-}
-
-class _SetPricePageState extends State<SetPricePage> {
-  final priceController = TextEditingController();
+  Future<void> setPrice(String id, String price) async {
+    await FirebaseFirestore.instance
+        .collection('production_plans')
+        .doc(id)
+        .update({'price': double.parse(price)});
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Set Selling Prices')),
-      body: ListView.builder(
-        itemCount: DummyData.products.length,
-        itemBuilder: (context, index) {
-          final product = DummyData.products[index];
+      appBar: AppBar(title: const Text("Set Price")),
+      body: StreamBuilder(
+        stream: FirebaseFirestore.instance
+            .collection('production_plans')
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const CircularProgressIndicator();
+          }
 
-          return ListTile(
-            title: Text(product.name),
-            subtitle: Text('Current price: ${product.price ?? "Not set"}'),
-            trailing: ElevatedButton(
-              child: const Text('Set Price'),
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (_) => AlertDialog(
-                    title: Text('Set price for ${product.name}'),
-                    content: TextField(
-                      controller: priceController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Price',
+          final products = snapshot.data!.docs;
+
+          return ListView.builder(
+            itemCount: products.length,
+            itemBuilder: (context, index) {
+              final p = products[index];
+              final priceController = TextEditingController();
+
+              return ListTile(
+                title: Text(p['product']),
+                subtitle: Text("Current Price: ${p.data().containsKey('price') ? p['price'] : 'Not set'}"),
+                trailing: SizedBox(
+                  width: 150,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: priceController,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(hintText: "Price"),
+                        ),
                       ),
-                    ),
-                    actions: [
-                      TextButton(
+                      IconButton(
+                        icon: const Icon(Icons.save),
                         onPressed: () {
-                          setState(() {
-                            product.price =
-                                double.parse(priceController.text);
-                          });
-                          priceController.clear();
-                          Navigator.pop(context);
+                          setPrice(p.id, priceController.text);
                         },
-                        child: const Text('Save'),
-                      )
+                      ),
                     ],
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            },
           );
         },
       ),

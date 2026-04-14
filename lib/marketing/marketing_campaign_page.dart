@@ -1,30 +1,70 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class MarketingCampaignPage extends StatelessWidget {
+class MarketingCampaignPage extends StatefulWidget {
   const MarketingCampaignPage({super.key});
+
+  @override
+  State<MarketingCampaignPage> createState() =>
+      _MarketingCampaignPageState();
+}
+
+class _MarketingCampaignPageState extends State<MarketingCampaignPage> {
+  final campaignController = TextEditingController();
+
+  Future<void> createCampaign() async {
+    if (campaignController.text.isEmpty) return;
+
+    await FirebaseFirestore.instance.collection('campaigns').add({
+      'name': campaignController.text,
+      'createdAt': Timestamp.now(),
+    });
+
+    campaignController.clear();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Marketing Campaigns')),
-      body: const Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Active Campaigns',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            SizedBox(height: 10),
-            ListTile(
-              title: Text('Discount on Men Shoes'),
-              subtitle: Text('10% discount this month'),
+      appBar: AppBar(title: const Text("Marketing Campaigns")),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: TextField(
+              controller: campaignController,
+              decoration: const InputDecoration(
+                labelText: "Campaign Name",
+              ),
             ),
-            ListTile(
-              title: Text('Boots Promotion'),
-              subtitle: Text('Buy 1 get 1 half price'),
+          ),
+          ElevatedButton(
+            onPressed: createCampaign,
+            child: const Text("Create Campaign"),
+          ),
+          Expanded(
+            child: StreamBuilder(
+              stream: FirebaseFirestore.instance
+                  .collection('campaigns')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const CircularProgressIndicator();
+                }
+
+                final campaigns = snapshot.data!.docs;
+
+                return ListView.builder(
+                  itemCount: campaigns.length,
+                  itemBuilder: (context, index) {
+                    final c = campaigns[index];
+                    return ListTile(title: Text(c['name']));
+                  },
+                );
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
